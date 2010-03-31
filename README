@@ -1,10 +1,10 @@
-This is a tool to help upload images to webservers
-often the image size if way beyond what the server can receive, 
+This is a flash-tool to help upload images to webservers
+often the image size if way beyond what the server can receive,
 or the size is so big that it will take a long time to transfere
 therefore this upload-tool will also resize the image.
 When it has been resized it can be uploaded to the remote server.
 
-The tool is built using HAXE and Windmill.
+The tool is built for adobe flash using HAXE and Windmill.
 
 Enjoy!
 /Tobias
