@@ -4,7 +4,7 @@ or the size is so big that it will take a long time to transfere
 therefore this upload-tool will also resize the image.
 When it has been resized it can be uploaded to the remote server.
 
-The tool is built using HAXE
+The tool is built using HAXE and Windmill.
 
 Enjoy!
 /Tobias
