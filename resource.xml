@@ -7,9 +7,6 @@
   <library>
     <clip id="upload" import="upload.png"/>
     <clip id="browse" import="browse.png"/>
-    <clip id="cal" import="cal.png"/>
-    <clip id="pen" import="pen.png"/>
-    <clip id="house" import="house.png"/>
     <clip id="progress" import="progress.swf"/>
   </library>
 

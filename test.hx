@@ -205,8 +205,8 @@ class Test {
          hiddenContainer.graphics.beginFill(0xcccccc);
          hiddenContainer.graphics.drawRect(0, 0, 10, 10);
          hiddenContainer.graphics.endFill();
-         hiddenContainer.x = 0;
-         hiddenContainer.y = 0;
+         hiddenContainer.x = 10;
+         hiddenContainer.y = 10;
          hiddenContainer.width = flash.Lib.current.stage.stageWidth;
          hiddenContainer.height = flash.Lib.current.stage.stageHeight;
          flash.Lib.current.addChild(hiddenContainer);
@@ -388,39 +388,42 @@ class Test {
 
     static function loaderComplete(event:flash.events.Event) {
            try {
-           trace( " Loader complete! ");
-           var aContainer : MovieClip;
-           if( imageWidth > imageHeight ) {
-           trace( "1 w>h! ");
-               event.target.width = flash.Lib.current.stage.stageWidth;
-               event.target.height = event.target.width * (imageHeight/imageWidth);
-               if( event.target == loader ) {
-                   trace( "1 loader! ");
-                  container.width = event.target.width;
-                  container.height = container.width * (imageHeight/imageWidth);
-               } else {
-                 trace( "1 hiddenLoader ");
-                  hiddenContainer.width = finalWidth;
-                  hiddenContainer.height = container.width * (imageHeight/imageWidth);
-               }
-           } else {
-           trace( "2 w<h! ");
-               event.target.height = flash.Lib.current.stage.stageHeight;
-               event.target.width = event.target.height * (imageWidth / imageHeight);
-               if( Reflect.compare( event.target, loader ) == 0 ) {
-                   trace( "2 loader! ");
-                  container.height = event.target.height;
-                  container.width = container.height * (imageWidth / imageHeight);
-               } else {
-                 trace( "2 hiddenLoader ");
-                  hiddenContainer.height = finalHeight;
-                  hiddenContainer.width = container.height * (imageWidth / imageHeight);
-               }
-           }
-           trace( "new size;" +event.target.width+ " x "+event.target.height );
-           // container.addChild( loader );
-           trace( "Image loaded completely" );
-           trace("w="+container.width+",h="+container.height);
+                 // trace( " Loader complete! "+Type.getClassName(Type.getClass(event.target)));
+                 var aLoader : flash.display.Loader = cast( event.target, flash.display.LoaderInfo ).loader;
+                 var aContainer : MovieClip;
+                 if( aLoader == loader ) {
+                       trace("Loader");
+                       if( imageWidth > imageHeight ) {
+                           aLoader.width = flash.Lib.current.stage.stageWidth;
+                       } else {
+                           aLoader.height = flash.Lib.current.stage.stageHeight;
+                       }
+                       aContainer = container;
+                 } else {
+                       trace("HiddenLoader");
+                       if( imageWidth > imageHeight ) {
+                           aLoader.width = finalWidth;
+                       } else {
+                           aLoader.height = finalHeight;
+                       }
+                        aLoader.width = finalWidth;
+                        aContainer = hiddenContainer;
+                 }
+
+
+                 if( imageWidth > imageHeight ) {
+                     trace( "1 w>h! ");
+                     aLoader.height = aLoader.width * (imageHeight/imageWidth);
+                     aContainer.width = aLoader.width;
+                     aContainer.height = aContainer.width * (imageHeight/imageWidth);
+                 } else {
+                     aLoader.width = aLoader.height * (imageWidth / imageHeight);
+                     aContainer.height = aLoader.height;
+                     aContainer.width = aContainer.height * (imageWidth / imageHeight);
+                 }
+                 trace( "new size;" +aLoader.width+ " x "+aLoader.height );
+                 trace( "Image loaded completely" );
+                 trace( "w="+aContainer.width+",h="+aContainer.height);
            }catch( msg : String ) {
               trace("Error occurred: " + msg);
            }
@@ -435,7 +438,7 @@ class Test {
             var width : Int = Math.round( loader.width );
             var height : Int = Math.round( loader.height );
             bmd = new BitmapData( width , height, true, 0xFFFFFFFF );
-            bmd.draw( container, new Matrix(), null, null, null, true );
+            bmd.draw( hiddenContainer, new Matrix(), null, null, null, true );
 //       trace( "bitmap drawn" );
             byteArray = new JPGEncoder( 90 ).encode( bmd );
        trace( "jpgencoder run size="+byteArray.length );
