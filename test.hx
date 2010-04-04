@@ -68,14 +68,12 @@ class UploadPostHelper
 			if(parameters == null) {
 				parameters = new Hash<String>();
 			}
-			parameters.set("Filename",  fileName );
-trace( ":filename="+fileName);
+			parameters.set("Filename",  fileName );                        
 			//add parameters to postData
 			for( key in parameters.keys() ) {
 				postData = BOUNDARY(postData);
 				postData = LINEBREAK(postData);
-				bytes = 'Content-Disposition: form-data; name="' + key + '"';
-trace( ":"+bytes);
+				bytes = 'Content-Disposition: form-data; name="' + key + '"';                                
 				for ( i in 0...(bytes.length) ) {
 					postData.writeByte( bytes.charCodeAt(i) );
 				}
@@ -89,7 +87,6 @@ trace( ":"+bytes);
 			postData = BOUNDARY(postData);
 			postData = LINEBREAK(postData);
 			bytes = 'Content-Disposition: form-data; name="Filedata"; filename="';
-trace( ":"+bytes);
 			for ( i in 0...(bytes.length) ) {
 				postData.writeByte( bytes.charCodeAt(i) );
 			}
@@ -189,19 +186,20 @@ class Test {
        static var bmd : BitmapData;
        static var byteArray : ByteArray;
        static var progress : MovieClip;
-       static var playProgress : Int;
        static var finalWidth : Int;
        static var finalHeight : Int;
        static var sessionid : String;
+       static var debug : Bool;
 
     static function main() {
       flash.Lib.current.loaderInfo.addEventListener(Event.COMPLETE, flashLoaderComplete);
-      trace(" " );
-      trace(" " );
-      trace("T3" );
-      trace(flash.Lib.current.loaderInfo.parameters);
+      debug = false;
+      if( debug ) trace(" " );
+      if( debug ) trace(" " );
+      if( debug ) trace("T3" );
+      if( debug ) trace(flash.Lib.current.loaderInfo.parameters);
 
-         trace( "Flash-object size: w="+flash.Lib.current.stage.stageWidth+",h="+flash.Lib.current.stage.stageHeight);
+         if( debug ) trace( "Flash-object size: w="+flash.Lib.current.stage.stageWidth+",h="+flash.Lib.current.stage.stageHeight);
 
          hiddenContainer = new MovieClip();
          hiddenContainer.graphics.beginFill(0xcccccc);
@@ -219,8 +217,18 @@ class Test {
          hiddenLoader.height = 150;
          hiddenContainer.addChild( hiddenLoader );
 
+         var backgroundContainer : MovieClip = new MovieClip();
+         backgroundContainer.graphics.beginFill(0xffffff);
+         backgroundContainer.graphics.drawRect(0, 0, 10, 10);
+         backgroundContainer.graphics.endFill();
+         backgroundContainer.x = 0;
+         backgroundContainer.y = 0;
+         backgroundContainer.width = flash.Lib.current.stage.stageWidth;
+         backgroundContainer.height = flash.Lib.current.stage.stageHeight;
+         flash.Lib.current.addChild(backgroundContainer);
+
          container = new MovieClip();
-         container.graphics.beginFill(0xffcccc);
+         container.graphics.beginFill(0xffffff);
          container.graphics.drawRect(0, 0, 10, 10);
          container.graphics.endFill();
          container.x = 0;
@@ -229,7 +237,7 @@ class Test {
          container.height = flash.Lib.current.stage.stageHeight;
          flash.Lib.current.addChild(container);
 
-         trace("w="+container.width+",h="+container.height);
+         if( debug ) trace("w="+container.width+",h="+container.height);
 
          imageFile = new flash.net.FileReference();
          imageFile.addEventListener( flash.events.Event.SELECT, filedialoglistener);
@@ -252,7 +260,6 @@ class Test {
          progress.x = flash.Lib.current.stage.stageWidth / 2 - 50;
          progress.y = flash.Lib.current.stage.stageHeight / 2 - 50;
          flash.Lib.current.addChild(progress);
-         playProgress = 0;
          progress.visible = false;
 
          loader = new Loader();
@@ -268,38 +275,32 @@ class Test {
             var params:Dynamic<String> = flash.Lib.current.loaderInfo.parameters;
             finalWidth = Std.parseInt( params.finalwidth );
             finalHeight = Std.parseInt( params.finalheight );
+            var debugValue = Std.parseInt( params.debug );
+            if( debugValue > 0 ) { 
+              debug = true;
+              trace( "" );
+              trace( "debug = yes" );
+            }
             sessionid = params.id;
-            trace(" finalwidth = "+finalWidth );
-            trace(" finalheight = "+finalHeight );
-            trace(" id = "+sessionid );
+            if( debug ) trace(" finalwidth = "+finalWidth );
+            if( debug ) trace(" finalheight = "+finalHeight );
+            if( debug ) trace(" id = "+sessionid );
      }
 
 
 
     static function clickSendImage(event:flash.events.MouseEvent)
     {
-        trace( "clickSendImage()" );
+        if( debug ) trace( "clickSendImage()" );
         progress.play();
-        playProgress = 1;
-        progress.visible = true;
-        /*
-        if( playProgress > 0 ) {
-                progress.stop();
-                playProgress = 0;
-                progress.visible = false;
-        } else {
-                progress.play();
-                playProgress = 1;
-                progress.visible = true;
-        }
-        */
+        progress.visible = true;        
         Test.encodeImage();
 
     }
 
     static function clickBrowseForFiles(event:flash.events.MouseEvent)
     {
-        trace( "clickBrowseForFiles()" );
+        if( debug ) trace( "clickBrowseForFiles()" );
         var fileFilter = [ new FileFilter("Images (*.jpg, *.jpeg)","*.jpg; *.jpeg") ];
         imageFile.browse(fileFilter);
 
@@ -307,12 +308,14 @@ class Test {
 
     static function filedialoglistener(event:flash.events.Event) {
 
-          trace( "About to load " + imageFile.name + " into flash-object" );
+          if( debug ) trace( "About to load " + imageFile.name + " into flash-object" );
+          progress.play();
+          progress.visible = true;
           imageFile.load();
   }
 
     static function fileLoadedCompletelyIntoFlash(event:flash.events.Event) {
-           trace( "File loaded completely into flash!" );
+           if( debug ) trace( "File loaded completely into flash!" );
            readSize( imageFile.data );
            loader.loadBytes(imageFile.data);
            loader.addEventListener(Event.ADDED_TO_STAGE,upload);
@@ -320,6 +323,9 @@ class Test {
            hiddenLoader.loadBytes(imageFile.data);
            hiddenLoader.addEventListener(Event.ADDED_TO_STAGE,upload);
            hiddenLoader.contentLoaderInfo.addEventListener(Event.COMPLETE,loaderComplete);
+           
+           progress.stop();
+           progress.visible = false;
     }
 
     static var sofo : Array<UInt> = [  0xFF, 0xC0  ]; // [  0xFF, 0xC0 , 0x00 , 0x11 , 0x08 ];
@@ -332,7 +338,7 @@ class Test {
            for( i in 0...sofo.length ){
             s = s + ";" + sofo[ i ] ;
            }
-           // trace( "sofo="+s  );
+           // if( debug ) trace( "sofo="+s  );
 
             s ="\n";
            var b : UInt;
@@ -341,12 +347,12 @@ class Test {
            var size : UInt;
            var length : UInt;
            size = data.bytesAvailable;
-           trace("size = " + size );
+           if( debug ) trace("size = " + size );
            b = data.readUnsignedByte();
            b = data.readUnsignedByte();
            while( data.bytesAvailable > sofo.length + 4 ) {
                   b = data.readUnsignedByte();
-                  // trace("b="+b);
+                  // if( debug ) trace("b="+b);
                   i = data.position;
                   if( i % 10 == 0 ) {
                       s = s + "\n" ;
@@ -355,18 +361,18 @@ class Test {
                   s = s + " " + b;
 
                   if( b == sofo[ index ] ) {
-                    // trace( "found " + index );
+                    // if( debug ) trace( "found " + index );
                     index++;
                   }else {
                     index=0;
                     b = data.readUnsignedByte();
-                    // trace("lb1="+b);
+                    // if( debug ) trace("lb1="+b);
                     length = b << 8;
                     b = data.readUnsignedByte();
-                    // trace("lb2="+b);
+                    // if( debug ) trace("lb2="+b);
                     length = length | b;
                     length = length - 2;
-                    //trace("length="+length);
+                    //if( debug ) trace("length="+length);
                     i = 0;
                     while( i < length ) {// && data.bytesAvailable > sofo.length + 4 ) {
                            b = data.readUnsignedByte();
@@ -379,7 +385,7 @@ class Test {
                         b = data.readUnsignedByte();
                         imageHeight = data.readUnsignedShort();
                         imageWidth = data.readUnsignedShort();
-                        trace( "Real image size determined; " + imageWidth + " x " + imageHeight );
+                        if( debug ) trace( "Real image size determined; " + imageWidth + " x " + imageHeight );
                         break;
                   }
 
@@ -390,7 +396,7 @@ class Test {
 
     static function loaderComplete(event:flash.events.Event) {
            try {
-                 // trace( " Loader complete! "+Type.getClassName(Type.getClass(event.target)));
+                 // if( debug ) trace( " Loader complete! "+Type.getClassName(Type.getClass(event.target)));
                  var aLoader : flash.display.Loader = cast( event.target, flash.display.LoaderInfo ).loader;
                  var aContainer : MovieClip;
                  var imageWidthHeightRatio : Float = (imageWidth / imageHeight);
@@ -398,7 +404,7 @@ class Test {
                  var finalWidthHeightRatio : Float = (finalWidth / finalHeight);
                  var resizeBasedOnWidth : Bool = true;
                  if( aLoader == loader ) {
-                       trace("Loader");
+                       if( debug ) trace("Loader");
                        if( stageWidthHeightRatio <= imageWidthHeightRatio ) {
                            aLoader.width = flash.Lib.current.stage.stageWidth;
                            resizeBasedOnWidth = true;
@@ -408,7 +414,7 @@ class Test {
                        }
                        aContainer = container;
                  } else {
-                       trace("HiddenLoader");
+                       if( debug ) trace("HiddenLoader");
                        if( finalWidthHeightRatio <= imageWidthHeightRatio ) {
                            aLoader.width = finalWidth;
                            resizeBasedOnWidth = true;
@@ -419,43 +425,43 @@ class Test {
                        aContainer = hiddenContainer;
                  }
                  if( resizeBasedOnWidth ) {
-                     trace( "1 w>h! ");
+                     if( debug ) trace( "1 w>h! ");
                      aLoader.height = aLoader.width * (imageHeight/imageWidth);
                      aContainer.width = aLoader.width;
                      aContainer.height = aContainer.width * (imageHeight/imageWidth);
                  } else {
-                     trace( "2 h>w! ");
+                     if( debug ) trace( "2 h>w! ");
                      aLoader.width = aLoader.height * (imageWidth / imageHeight);
                      aContainer.height = aLoader.height;
                      aContainer.width = aContainer.height * (imageWidth / imageHeight);
                  }
-                 trace( "new size;" +aLoader.width+ " x "+aLoader.height );
-                 trace( "Image loaded completely" );
-                 trace( "w="+aContainer.width+",h="+aContainer.height);
+                 if( debug ) trace( "new size;" +aLoader.width+ " x "+aLoader.height );
+                 if( debug ) trace( "Image loaded completely" );
+                 if( debug ) trace( "w="+aContainer.width+",h="+aContainer.height);
            }catch( msg : String ) {
-              trace("Error occurred: " + msg);
+              if( debug ) trace("Error occurred: " + msg);
            }
     }
 
     static function upload(ev:Event) {
-            trace( "Upload complete" );
+            if( debug ) trace( "Upload complete" );
      }
 
      static function encodeImage() {
-       trace( "encodeImage()" );
+       if( debug ) trace( "encodeImage()" );
                  var aLoader : flash.display.Loader;
                  aLoader = loader;
-                 trace( "1w="+aLoader.width+",h="+aLoader.height);
+                 if( debug ) trace( "1w="+aLoader.width+",h="+aLoader.height);
                  aLoader = hiddenLoader;
-                 trace( "2w="+aLoader.width+",h="+aLoader.height);
+                 if( debug ) trace( "2w="+aLoader.width+",h="+aLoader.height);
 
             var width : Int = Math.round( hiddenLoader.width );
             var height : Int = Math.round( hiddenLoader.height );
             bmd = new BitmapData( width , height, true, 0xFFFFFFFF );
             bmd.draw( hiddenContainer, new Matrix(), null, null, null, true );
-//       trace( "bitmap drawn" );
+//       if( debug ) trace( "bitmap drawn" );
             byteArray = new JPGEncoder( 90 ).encode( bmd );
-       trace( "jpgencoder run size="+byteArray.length );
+       if( debug ) trace( "jpgencoder run size="+byteArray.length );
           // set up the request & headers for the image upload;
           var params:Dynamic<String> = flash.Lib.current.loaderInfo.parameters;
           urlRequest = new URLRequest();
@@ -466,53 +472,52 @@ class Test {
           urlRequest.data = UploadPostHelper.getPostData( imageFile.name, byteArray );
           urlRequest.requestHeaders.push( new URLRequestHeader( 'Cache-Control', 'no-cache' ) );
           // create the image loader & send the image to the server;
-       trace( "url: "+ urlRequest.url );
+       if( debug ) trace( "url: "+ urlRequest.url );
           urlLoader = new URLLoader();
           urlLoader.addEventListener(Event.COMPLETE, urlLoaderComplete );
           urlLoader.addEventListener(IOErrorEvent.IO_ERROR, onIOError);
           urlLoader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, onSecurityError);
           urlLoader.addEventListener(HTTPStatusEvent.HTTP_STATUS, onHttpStatus);
           urlLoader.addEventListener(ProgressEvent.PROGRESS, onProgressEvent);
-       trace("urlLoader eventlisterners created!");
+       if( debug ) trace("urlLoader eventlisterners created!");
           urlLoader.dataFormat = URLLoaderDataFormat.BINARY;
           try {
                 urlLoader.load( urlRequest );
             }
             catch (error:Error) {
-                trace( " Unable to load URL: " + error);
+                if( debug ) trace( " Unable to load URL: " + error);
             }
 
-       trace( "urlLoader run." );
+       if( debug ) trace( "urlLoader run." );
      }
 
      static function urlLoaderComplete(ev:Event) {
             progress.stop();
-            playProgress = 0;
             progress.visible = false;
-            trace("urlLoadComplete()");
-            trace("event: "+ev.toString() );
-            trace("bytesloaded="+urlLoader.bytesLoaded+", bytesTotal="+urlLoader.bytesTotal+"\n");
-            // trace("data="+urlLoader.data);
+            if( debug ) trace("urlLoadComplete()");
+            if( debug ) trace("event: "+ev.toString() );
+            if( debug ) trace("bytesloaded="+urlLoader.bytesLoaded+", bytesTotal="+urlLoader.bytesTotal+"\n");
+            // if( debug ) trace("data="+urlLoader.data);
      }
 
      static function onIOError(evt:IOErrorEvent)
         {
-            trace( " IOError: " + evt.text );
+            if( debug ) trace( " IOError: " + evt.text );
         }
 
      static function onSecurityError(evt:SecurityErrorEvent)
         {
-            trace( " SecurityErrorEvent.: " + evt.text );
+            if( debug ) trace( " SecurityErrorEvent.: " + evt.text );
         }
 
      static function onHttpStatus(evt:HTTPStatusEvent)
         {
-            trace( " HTTPStatusEvent.: status " + evt.status );
+            if( debug ) trace( " HTTPStatusEvent.: status " + evt.status );
         }
 
      static function onProgressEvent(evt:ProgressEvent)
         {
-            trace( " ProgressEvent.: " + evt.bytesLoaded );
+            if( debug ) trace( " ProgressEvent.: " + evt.bytesLoaded );
         }
 }
 
