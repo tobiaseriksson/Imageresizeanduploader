@@ -190,6 +190,8 @@ class Test {
        static var finalHeight : Int;
        static var sessionid : String;
        static var debug : Bool;
+       static var upload : MovieClip;
+       static var browse : MovieClip;
 
     static function main() {
       flash.Lib.current.loaderInfo.addEventListener(Event.COMPLETE, flashLoaderComplete);
@@ -243,17 +245,18 @@ class Test {
          imageFile.addEventListener( flash.events.Event.SELECT, filedialoglistener);
          imageFile.addEventListener( flash.events.Event.COMPLETE , fileLoadedCompletelyIntoFlash);
 
-         var browse = flash.Lib.attach("browse");
+         browse = flash.Lib.attach("browse");
          browse.x = 0;
          browse.y = 0;
          flash.Lib.current.addChild(browse);
          browse.addEventListener(flash.events.MouseEvent.CLICK, clickBrowseForFiles);
 
-         var upload = flash.Lib.attach("upload");
+         upload = flash.Lib.attach("upload");
          upload.x = 80;
          upload.y = 0;
          flash.Lib.current.addChild(upload);
          upload.addEventListener(flash.events.MouseEvent.CLICK, clickSendImage);
+         upload.visible = false;
 
 
          progress = flash.Lib.attach("progress");
@@ -293,8 +296,10 @@ class Test {
     {
         if( debug ) trace( "clickSendImage()" );
         progress.play();
-        progress.visible = true;        
-        Test.encodeImage();
+        progress.visible = true;
+        upload.visible = false;
+        browse.visible = false;
+        Test.encodeAndSendImage();
 
     }
 
@@ -318,14 +323,16 @@ class Test {
            if( debug ) trace( "File loaded completely into flash!" );
            readSize( imageFile.data );
            loader.loadBytes(imageFile.data);
-           loader.addEventListener(Event.ADDED_TO_STAGE,upload);
+           loader.addEventListener(Event.ADDED_TO_STAGE,loadedIntoFlash);
            loader.contentLoaderInfo.addEventListener(Event.COMPLETE,loaderComplete);
            hiddenLoader.loadBytes(imageFile.data);
-           hiddenLoader.addEventListener(Event.ADDED_TO_STAGE,upload);
+           hiddenLoader.addEventListener(Event.ADDED_TO_STAGE,loadedIntoFlash);
            hiddenLoader.contentLoaderInfo.addEventListener(Event.COMPLETE,loaderComplete);
-           
+
            progress.stop();
            progress.visible = false;
+           upload.visible = true;
+           browse.visible = true;
     }
 
     static var sofo : Array<UInt> = [  0xFF, 0xC0  ]; // [  0xFF, 0xC0 , 0x00 , 0x11 , 0x08 ];
@@ -443,11 +450,11 @@ class Test {
            }
     }
 
-    static function upload(ev:Event) {
-            if( debug ) trace( "Upload complete" );
+    static function loadedIntoFlash(ev:Event) {
+            if( debug ) trace( "loadedIntoFlash complete" );
      }
 
-     static function encodeImage() {
+     static function encodeAndSendImage() {
        if( debug ) trace( "encodeImage()" );
                  var aLoader : flash.display.Loader;
                  aLoader = loader;
@@ -498,21 +505,25 @@ class Test {
             if( debug ) trace("event: "+ev.toString() );
             if( debug ) trace("bytesloaded="+urlLoader.bytesLoaded+", bytesTotal="+urlLoader.bytesTotal+"\n");
             // if( debug ) trace("data="+urlLoader.data);
+            browse.visible = true;
      }
 
      static function onIOError(evt:IOErrorEvent)
         {
             if( debug ) trace( " IOError: " + evt.text );
+            browse.visible = true;
         }
 
      static function onSecurityError(evt:SecurityErrorEvent)
         {
             if( debug ) trace( " SecurityErrorEvent.: " + evt.text );
+            browse.visible = true;
         }
 
      static function onHttpStatus(evt:HTTPStatusEvent)
         {
             if( debug ) trace( " HTTPStatusEvent.: status " + evt.status );
+            browse.visible = true;
         }
 
      static function onProgressEvent(evt:ProgressEvent)
