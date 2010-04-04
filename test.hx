@@ -197,6 +197,8 @@ class Test {
     static function main() {
       flash.Lib.current.loaderInfo.addEventListener(Event.COMPLETE, flashLoaderComplete);
       trace(" " );
+      trace(" " );
+      trace("T3" );
       trace(flash.Lib.current.loaderInfo.parameters);
 
          trace( "Flash-object size: w="+flash.Lib.current.stage.stageWidth+",h="+flash.Lib.current.stage.stageHeight);
@@ -205,8 +207,8 @@ class Test {
          hiddenContainer.graphics.beginFill(0xcccccc);
          hiddenContainer.graphics.drawRect(0, 0, 10, 10);
          hiddenContainer.graphics.endFill();
-         hiddenContainer.x = 10;
-         hiddenContainer.y = 10;
+         hiddenContainer.x = 0;
+         hiddenContainer.y = 0;
          hiddenContainer.width = flash.Lib.current.stage.stageWidth;
          hiddenContainer.height = flash.Lib.current.stage.stageHeight;
          flash.Lib.current.addChild(hiddenContainer);
@@ -391,32 +393,38 @@ class Test {
                  // trace( " Loader complete! "+Type.getClassName(Type.getClass(event.target)));
                  var aLoader : flash.display.Loader = cast( event.target, flash.display.LoaderInfo ).loader;
                  var aContainer : MovieClip;
+                 var imageWidthHeightRatio : Float = (imageWidth / imageHeight);
+                 var stageWidthHeightRatio : Float = (flash.Lib.current.stage.stageWidth / flash.Lib.current.stage.stageHeight);
+                 var finalWidthHeightRatio : Float = (finalWidth / finalHeight);
+                 var resizeBasedOnWidth : Bool = true;
                  if( aLoader == loader ) {
                        trace("Loader");
-                       if( imageWidth > imageHeight ) {
+                       if( stageWidthHeightRatio <= imageWidthHeightRatio ) {
                            aLoader.width = flash.Lib.current.stage.stageWidth;
+                           resizeBasedOnWidth = true;
                        } else {
                            aLoader.height = flash.Lib.current.stage.stageHeight;
+                           resizeBasedOnWidth = false;
                        }
                        aContainer = container;
                  } else {
                        trace("HiddenLoader");
-                       if( imageWidth > imageHeight ) {
+                       if( finalWidthHeightRatio <= imageWidthHeightRatio ) {
                            aLoader.width = finalWidth;
+                           resizeBasedOnWidth = true;
                        } else {
                            aLoader.height = finalHeight;
+                           resizeBasedOnWidth = false;
                        }
-                        aLoader.width = finalWidth;
-                        aContainer = hiddenContainer;
+                       aContainer = hiddenContainer;
                  }
-
-
-                 if( imageWidth > imageHeight ) {
+                 if( resizeBasedOnWidth ) {
                      trace( "1 w>h! ");
                      aLoader.height = aLoader.width * (imageHeight/imageWidth);
                      aContainer.width = aLoader.width;
                      aContainer.height = aContainer.width * (imageHeight/imageWidth);
                  } else {
+                     trace( "2 h>w! ");
                      aLoader.width = aLoader.height * (imageWidth / imageHeight);
                      aContainer.height = aLoader.height;
                      aContainer.width = aContainer.height * (imageWidth / imageHeight);
@@ -435,8 +443,14 @@ class Test {
 
      static function encodeImage() {
        trace( "encodeImage()" );
-            var width : Int = Math.round( loader.width );
-            var height : Int = Math.round( loader.height );
+                 var aLoader : flash.display.Loader;
+                 aLoader = loader;
+                 trace( "1w="+aLoader.width+",h="+aLoader.height);
+                 aLoader = hiddenLoader;
+                 trace( "2w="+aLoader.width+",h="+aLoader.height);
+
+            var width : Int = Math.round( hiddenLoader.width );
+            var height : Int = Math.round( hiddenLoader.height );
             bmd = new BitmapData( width , height, true, 0xFFFFFFFF );
             bmd.draw( hiddenContainer, new Matrix(), null, null, null, true );
 //       trace( "bitmap drawn" );
@@ -445,7 +459,8 @@ class Test {
           // set up the request & headers for the image upload;
           var params:Dynamic<String> = flash.Lib.current.loaderInfo.parameters;
           urlRequest = new URLRequest();
-          urlRequest.url = 'http://www.t-s-t.se/uploadtest/image.php?path=images&userid='+params.userid;
+          //urlRequest.url = 'http://www.t-s-t.se/uploadtest/image.php?path=images&userid='+params.userid;
+          urlRequest.url = 'image.php?tid=1&path=images&userid='+params.userid;
           urlRequest.contentType = 'multipart/form-data; boundary=' + UploadPostHelper.getBoundary();
           urlRequest.method = URLRequestMethod.POST;
           urlRequest.data = UploadPostHelper.getPostData( imageFile.name, byteArray );
