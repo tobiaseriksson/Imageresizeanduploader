@@ -1,0 +1,4 @@
+-swf9 test.swf
+-swf-version 10
+-main Test
+-swf-lib library.swf

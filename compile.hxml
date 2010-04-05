@@ -1,4 +1,4 @@
--swf9 test.swf
+-swf9 ImageUploader.swf
 -swf-version 10
--main Test
+-main ImageUploader
 -swf-lib library.swf
