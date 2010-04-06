@@ -192,16 +192,14 @@ class ImageUploader {
        static var debug : Bool;
        static var upload : MovieClip;
        static var browse : MovieClip;
-       static var backgroundContainerImage : MovieClip;
-       static var backgroundContainer : MovieClip;
-       static var backgroundImageLoader : Loader;
+       static var userDefinedBackgroundImage:Loader;
+       static var backgroundImage : MovieClip;
 
     static function main() {
       flash.Lib.current.loaderInfo.addEventListener(Event.COMPLETE, flashLoaderComplete);
       debug = false;
       if( debug ) trace(" " );
       if( debug ) trace(" " );
-      if( debug ) trace("T3" );
       if( debug ) trace(flash.Lib.current.loaderInfo.parameters);
 
          if( debug ) trace( "Flash-object size: w="+flash.Lib.current.stage.stageWidth+",h="+flash.Lib.current.stage.stageHeight);
@@ -221,43 +219,23 @@ class ImageUploader {
          hiddenLoader.width = 150;
          hiddenLoader.height = 150;
          hiddenContainer.addChild( hiddenLoader );
-         /*
-         backgroundContainer = new MovieClip();
-         backgroundContainer.graphics.beginFill(0xee0000);
-         backgroundContainer.graphics.drawRect(0, 0, 10, 10);
-         backgroundContainer.graphics.endFill();
-         backgroundContainer.x = 0;
-         backgroundContainer.y = 0;
-         backgroundContainer.width = flash.Lib.current.stage.stageWidth;
-         backgroundContainer.height = flash.Lib.current.stage.stageHeight;
-         flash.Lib.current.addChild(backgroundContainer);
-         /*
-         backgroundContainerImage = flash.Lib.attach("missingphoto");
-         backgroundContainerImage.x = 0;
-         backgroundContainerImage.y = 0;
-         backgroundContainerImage.width = flash.Lib.current.stage.stageWidth;
-         backgroundContainerImage.height = flash.Lib.current.stage.stageHeight;
-         flash.Lib.current.addChild(backgroundContainerImage);
-         */
-         var ldr:Loader = new Loader();
-         var url:String = "missingphoto.png";
-         var urlReq:URLRequest = new URLRequest(url);
-         ldr.load(urlReq);
-         flash.Lib.current.addChild(ldr);
+
+         backgroundImage = flash.Lib.attach("missingphoto");
+         backgroundImage.x = 0;
+         backgroundImage.y = 0;
+         backgroundImage.width = flash.Lib.current.stage.stageWidth;
+         backgroundImage.height = flash.Lib.current.stage.stageHeight;
+         flash.Lib.current.addChild(backgroundImage);
+
+         userDefinedBackgroundImage = new Loader();
+         flash.Lib.current.addChild(userDefinedBackgroundImage);
 
          container = new MovieClip();
-         /*
-         container.graphics.beginFill(0xffffff);
-         container.graphics.drawRect(0, 0, 10, 10);
-         container.graphics.endFill();
-         */
          container.x = 0;
          container.y = 0;
          container.width = flash.Lib.current.stage.stageWidth;
          container.height = flash.Lib.current.stage.stageHeight;
          flash.Lib.current.addChild(container);
-
-         if( debug ) trace("w="+container.width+",h="+container.height);
 
          imageFile = new flash.net.FileReference();
          imageFile.addEventListener( flash.events.Event.SELECT, filedialoglistener);
@@ -275,7 +253,6 @@ class ImageUploader {
          flash.Lib.current.addChild(upload);
          upload.addEventListener(flash.events.MouseEvent.CLICK, clickSendImage);
          upload.visible = false;
-
 
          progress = flash.Lib.attach("progress");
          progress.x = flash.Lib.current.stage.stageWidth / 2 - 50;
@@ -306,6 +283,11 @@ class ImageUploader {
             if( debug ) trace(" finalwidth = "+finalWidth );
             if( debug ) trace(" finalheight = "+finalHeight );
             if( debug ) trace(" id = "+sessionid );
+
+            var url:String = params.initialimage;
+            if( debug ) trace(" missingimage = "+url );
+            var urlReq:URLRequest = new URLRequest(url);
+            userDefinedBackgroundImage.load(urlReq);
      }
 
 
