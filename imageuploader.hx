@@ -175,9 +175,9 @@ class UploadPostHelper
 
 
 class ImageUploader {
-       static var mc : MovieClip;
-       static var imageFile : flash.net.FileReference;
-       static var loader : Loader;
+
+       static var localImageFile : flash.net.FileReference;
+       static var localImageFileLoader : Loader;
        static var container : MovieClip;
        static var hiddenLoader : Loader;
        static var hiddenContainer : MovieClip;
@@ -237,9 +237,9 @@ class ImageUploader {
          container.height = flash.Lib.current.stage.stageHeight;
          flash.Lib.current.addChild(container);
 
-         imageFile = new flash.net.FileReference();
-         imageFile.addEventListener( flash.events.Event.SELECT, filedialoglistener);
-         imageFile.addEventListener( flash.events.Event.COMPLETE , fileLoadedCompletelyIntoFlash);
+         localImageFile = new flash.net.FileReference();
+         localImageFile.addEventListener( flash.events.Event.SELECT, filedialoglistener);
+         localImageFile.addEventListener( flash.events.Event.COMPLETE , fileLoadedCompletelyIntoFlash);
 
          browse = flash.Lib.attach("browse");
          browse.x = 0;
@@ -260,12 +260,12 @@ class ImageUploader {
          flash.Lib.current.addChild(progress);
          progress.visible = false;
 
-         loader = new Loader();
-         loader.x = 0;
-         loader.y = 0;
-         loader.width = 150;
-         loader.height = 150;
-         container.addChild( loader );
+         localImageFileLoader = new Loader();
+         localImageFileLoader.x = 0;
+         localImageFileLoader.y = 0;
+         localImageFileLoader.width = 150;
+         localImageFileLoader.height = 150;
+         container.addChild( localImageFileLoader );
     }
 
      static function flashLoaderComplete(myEvent:Event)
@@ -307,25 +307,25 @@ class ImageUploader {
     {
         if( debug ) trace( "clickBrowseForFiles()" );
         var fileFilter = [ new FileFilter("Images (*.jpg, *.jpeg)","*.jpg; *.jpeg") ];
-        imageFile.browse(fileFilter);
+        localImageFile.browse(fileFilter);
 
     }
 
     static function filedialoglistener(event:flash.events.Event) {
 
-          if( debug ) trace( "About to load " + imageFile.name + " into flash-object" );
+          if( debug ) trace( "About to load " + localImageFile.name + " into flash-object" );
           progress.play();
           progress.visible = true;
-          imageFile.load();
+          localImageFile.load();
   }
 
     static function fileLoadedCompletelyIntoFlash(event:flash.events.Event) {
            if( debug ) trace( "File loaded completely into flash!" );
-           readSize( imageFile.data );
-           loader.loadBytes(imageFile.data);
-           loader.addEventListener(Event.ADDED_TO_STAGE,loadedIntoFlash);
-           loader.contentLoaderInfo.addEventListener(Event.COMPLETE,loaderComplete);
-           hiddenLoader.loadBytes(imageFile.data);
+           readSize( localImageFile.data );
+           localImageFileLoader.loadBytes(localImageFile.data);
+           localImageFileLoader.addEventListener(Event.ADDED_TO_STAGE,loadedIntoFlash);
+           localImageFileLoader.contentLoaderInfo.addEventListener(Event.COMPLETE,loaderComplete);
+           hiddenLoader.loadBytes(localImageFile.data);
            hiddenLoader.addEventListener(Event.ADDED_TO_STAGE,loadedIntoFlash);
            hiddenLoader.contentLoaderInfo.addEventListener(Event.COMPLETE,loaderComplete);
 
@@ -410,7 +410,7 @@ class ImageUploader {
                  var stageWidthHeightRatio : Float = (flash.Lib.current.stage.stageWidth / flash.Lib.current.stage.stageHeight);
                  var finalWidthHeightRatio : Float = (finalWidth / finalHeight);
                  var resizeBasedOnWidth : Bool = true;
-                 if( aLoader == loader ) {
+                 if( aLoader == localImageFileLoader ) {
                        if( debug ) trace("Loader");
                        if( stageWidthHeightRatio <= imageWidthHeightRatio ) {
                            aLoader.width = flash.Lib.current.stage.stageWidth;
@@ -457,7 +457,7 @@ class ImageUploader {
      static function encodeAndSendImage() {
        if( debug ) trace( "encodeImage()" );
                  var aLoader : flash.display.Loader;
-                 aLoader = loader;
+                 aLoader = localImageFileLoader;
                  if( debug ) trace( "1w="+aLoader.width+",h="+aLoader.height);
                  aLoader = hiddenLoader;
                  if( debug ) trace( "2w="+aLoader.width+",h="+aLoader.height);
@@ -476,7 +476,7 @@ class ImageUploader {
           urlRequest.url = 'image.php?tid=1&path=images&userid='+params.userid;
           urlRequest.contentType = 'multipart/form-data; boundary=' + UploadPostHelper.getBoundary();
           urlRequest.method = URLRequestMethod.POST;
-          urlRequest.data = UploadPostHelper.getPostData( imageFile.name, byteArray );
+          urlRequest.data = UploadPostHelper.getPostData( localImageFile.name, byteArray );
           urlRequest.requestHeaders.push( new URLRequestHeader( 'Cache-Control', 'no-cache' ) );
           // create the image loader & send the image to the server;
        if( debug ) trace( "url: "+ urlRequest.url );
