@@ -1,5 +1,6 @@
 // extern class newsimage extends MovieClip {}
 import Math;
+import StringTools;
 import flash.Error;
 import flash.display.MovieClip;
 import flash.display.Graphics;
@@ -188,7 +189,7 @@ class ImageUploader {
        static var progress : MovieClip;
        static var finalWidth : Int;
        static var finalHeight : Int;
-       static var sessionid : String;
+       static var action : String;
        static var debug : Bool;
        static var upload : MovieClip;
        static var browse : MovieClip;
@@ -228,6 +229,8 @@ class ImageUploader {
          flash.Lib.current.addChild(backgroundImage);
 
          userDefinedBackgroundImage = new Loader();
+         userDefinedBackgroundImage.x = 0;
+         userDefinedBackgroundImage.y = 0;
          flash.Lib.current.addChild(userDefinedBackgroundImage);
 
          container = new MovieClip();
@@ -279,10 +282,15 @@ class ImageUploader {
               trace( "" );
               trace( "debug = yes" );
             }
-            sessionid = params.id;
             if( debug ) trace(" finalwidth = "+finalWidth );
             if( debug ) trace(" finalheight = "+finalHeight );
-            if( debug ) trace(" id = "+sessionid );
+
+            action = StringTools.replace( params.action, "_:_", "&" );
+            if( action.length() <=0 ) {
+              trace( "" );
+              trace( "no action defined ! e.g. action=image.php" );
+            }
+            if( debug ) trace(" action = "+action );
 
             var url:String = params.initialimage;
             if( debug ) trace(" missingimage = "+url );
@@ -472,8 +480,8 @@ class ImageUploader {
           // set up the request & headers for the image upload;
           var params:Dynamic<String> = flash.Lib.current.loaderInfo.parameters;
           urlRequest = new URLRequest();
-          //urlRequest.url = 'http://www.t-s-t.se/uploadtest/image.php?path=images&userid='+params.userid;
-          urlRequest.url = 'image.php?tid=1&path=images&userid='+params.userid;
+          //urlRequest.url = 'image.php?path=images';
+          urlRequest.url = action;
           urlRequest.contentType = 'multipart/form-data; boundary=' + UploadPostHelper.getBoundary();
           urlRequest.method = URLRequestMethod.POST;
           urlRequest.data = UploadPostHelper.getPostData( localImageFile.name, byteArray );
